@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Random Emoji — EmojiHub API</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      text-align: center;
+      background-color: #f0f0f0;
+      color: #333;
+    }
+    button {
+      font-size: 2rem;
+      padding: 1rem 2rem;
+      cursor: pointer;
+    }
+    #emojiDisplay {
+      font-size: 4rem;
+      margin: 2rem 0;
+    }
+    #info {
+      font-size: 1rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Random Emoji Generator</h1>
+  <button id="getEmojiBtn">Get Random Emoji</button>
+  <div id="emojiDisplay">🤔</div>
+  <div id="info">
+    <p><strong>Name:</strong> —</p>
+    <p><strong>Category:</strong> —</p>
+    <p><strong>Group:</strong> —</p>
+  </div>
+
+  <script>
+    async function fetchRandomEmoji() {
+      try {
+        const response = await fetch("https://emojihub.yurace.pro/api/random");
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const data = await response.json();
+        displayEmoji(data);
+      } catch (err) {
+        console.error(err);
+        document.getElementById("emojiDisplay").textContent = "❌";
+        document.getElementById("info").innerHTML = `<p><strong>Error:</strong> ${err.message}</p>`;
+      }
+    }
+
+    function displayEmoji(data) {
+      // The API returns HTML character codes, like ["&#129303;"]
+      const code = data.htmlCode && data.htmlCode[0] ? data.htmlCode[0] : '';
+      // Convert HTML code into actual emoji character
+      const parser = new DOMParser();
+      const emoji = parser.parseFromString(`<!DOCTYPE html><body>${code}`, "text/html")
+                          .body.textContent || '';
+
+      document.getElementById("emojiDisplay").textContent = emoji || "—";
+      document.getElementById("info").innerHTML = `
+        <p><strong>Name:</strong> ${data.name || '—'}</p>
+        <p><strong>Category:</strong> ${data.category || '—'}</p>
+        <p><strong>Group:</strong> ${data.group || '—'}</p>
+      `;
+    }
+
+    document.getElementById("getEmojiBtn").addEventListener("click", fetchRandomEmoji);
+  </script>
+</body>
+</html>
